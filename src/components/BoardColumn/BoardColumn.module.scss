@@ -1,0 +1,17 @@
+@import "../../variables.scss";
+.column {
+  background-color: #031581;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  .cell {
+    width: $chip-size;
+    height: $chip-size;
+    background-color: grey;
+    border: 0.0625rem solid black;
+    border-radius: 100%;
+    position: relative;
+  }
+}

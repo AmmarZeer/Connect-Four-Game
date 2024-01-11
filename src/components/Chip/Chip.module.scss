@@ -1,0 +1,13 @@
+@import "../../variables.scss";
+.chip {
+  width: $chip-size;
+  height: $chip-size;
+  border-radius: 100%;
+
+  &.player1 {
+    background-color: red;
+  }
+  &.player2 {
+    background-color: yellow;
+  }
+}
