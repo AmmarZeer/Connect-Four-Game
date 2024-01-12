@@ -1,0 +1,9 @@
+@import "../../variables.scss";
+
+.cell {
+  width: $chip-size;
+  height: $chip-size;
+  background-color: grey;
+  border: 0.0625rem solid black;
+  border-radius: 100%;
+}
