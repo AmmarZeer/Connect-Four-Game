@@ -8,10 +8,17 @@ interface IBoardColumnProps {
   columnData: Players[];
   setBoardData: React.Dispatch<React.SetStateAction<Players[][]>>;
   currentPlayer: Players;
+  onChipAddition: (column: number, row: number) => void;
 }
 
 function BoardColumn(props: IBoardColumnProps) {
-  const { columnNumber, columnData, setBoardData, currentPlayer } = props;
+  const {
+    columnNumber,
+    columnData,
+    setBoardData,
+    currentPlayer,
+    onChipAddition,
+  } = props;
 
   function isColumnValidToAdd(): boolean {
     return columnData[0] === null;
@@ -22,6 +29,7 @@ function BoardColumn(props: IBoardColumnProps) {
     for (let i = newColumnData.length - 1; i >= 0; i--) {
       if (newColumnData[i] === null) {
         newColumnData[i] = currentPlayer;
+        onChipAddition(columnNumber, i);
         break;
       }
     }
