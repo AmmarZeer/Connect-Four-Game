@@ -2,25 +2,70 @@ import { useEffect, useRef, useState } from "react";
 import BoardColumn from "../BoardColumn/BoardColumn";
 import styles from "./GameBoard.module.scss";
 import { Players } from "../enums";
+import {
+  CONSECUTIVE_CHIPS_TO_WIN,
+  NUMBER_OF_COLUMNS,
+  NUMBER_OF_ROWS,
+} from "../constants";
+import { ChipPosition } from "../types";
 
-const initialBoardData = new Array(7)
+const initialBoardData = new Array(NUMBER_OF_COLUMNS)
   .fill([])
-  .map(() => new Array(6).fill(null));
+  .map(() => new Array(NUMBER_OF_ROWS).fill(null));
+const initialChipPositionRef: ChipPosition = { row: 0, column: 0 };
 
 function GameBoard() {
-  const [boardData, setBoardData] = useState<Players[][]>(initialBoardData);
+  const [boardData, setBoardData] = useState<Players[][]>(initialBoardData); // we same the data as array of columns
   const [currentPlayer, setCurrentPlayer] = useState<Players>(Players.Player1);
-  const lastAddedChipPosition = useRef<{ row: number; column: number } | null>(
-    null
-  );
+  const lastAddedChipPosition = useRef<ChipPosition>(initialChipPositionRef);
 
   function onChipAddition(column: number, cell: number) {
     lastAddedChipPosition.current = { row: cell, column };
   }
 
-  function hasAPlayerWon(winningPlayer: Players): boolean {
-    console.log(winningPlayer);
+  function isHorizontalWin(): boolean {
+    const rowIndexToCheck = lastAddedChipPosition.current.row;
+    let numberOfConsecutiveChips: number = 0;
+
+    for (let i = 0; i < NUMBER_OF_COLUMNS; i++) {
+      const chip = boardData[i][rowIndexToCheck];
+      if (chip === currentPlayer) {
+        numberOfConsecutiveChips++;
+        if (numberOfConsecutiveChips === CONSECUTIVE_CHIPS_TO_WIN) return true;
+      } else {
+        numberOfConsecutiveChips = 0;
+      }
+    }
+
     return false;
+  }
+
+  function isVerticalWin(): boolean {
+    const columnToCheck = boardData[lastAddedChipPosition.current.column];
+    let numberOfConsecutiveChips: number = 0;
+
+    for (const chip of columnToCheck) {
+      if (chip === currentPlayer) {
+        numberOfConsecutiveChips++;
+        if (numberOfConsecutiveChips === CONSECUTIVE_CHIPS_TO_WIN) return true;
+      } else {
+        numberOfConsecutiveChips = 0;
+      }
+    }
+
+    return false;
+  }
+
+  function isRightDiagonalWin(): boolean {
+    return false;
+  }
+
+  function isLeftDiagonalWin(): boolean {
+    return false;
+  }
+
+  function hasAPlayerWon(): boolean {
+    return isHorizontalWin() || isVerticalWin();
   }
 
   function isTheGameADraw(): boolean {
@@ -32,10 +77,10 @@ function GameBoard() {
       prev === Players.Player1 ? Players.Player2 : Players.Player1
     );
 
-    if (hasAPlayerWon(currentPlayer)) {
+    if (hasAPlayerWon()) {
       console.log("The game is won");
-    } else {
-      isTheGameADraw();
+    } else if (isTheGameADraw()) {
+      console.log("Game is a Draw");
     }
   }, [boardData]);
 
