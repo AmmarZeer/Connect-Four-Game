@@ -24,8 +24,8 @@ function GameBoard() {
   }
 
   function isHorizontalWin(): boolean {
+    let numberOfConsecutiveChips = 0;
     const rowIndexToCheck = lastAddedChipPosition.current.row;
-    let numberOfConsecutiveChips: number = 0;
 
     for (let i = 0; i < NUMBER_OF_COLUMNS; i++) {
       const chip = boardData[i][rowIndexToCheck];
@@ -41,8 +41,8 @@ function GameBoard() {
   }
 
   function isVerticalWin(): boolean {
+    let numberOfConsecutiveChips = 0;
     const columnToCheck = boardData[lastAddedChipPosition.current.column];
-    let numberOfConsecutiveChips: number = 0;
 
     for (const chip of columnToCheck) {
       if (chip === currentPlayer) {
@@ -56,16 +56,67 @@ function GameBoard() {
     return false;
   }
 
+  //Go to most available top right cell, then check diagonally from top right to bottom left
   function isRightDiagonalWin(): boolean {
+    let numberOfConsecutiveChips = 0;
+    const chipColumn = lastAddedChipPosition.current.column;
+    const chipRow = lastAddedChipPosition.current.row;
+
+    const differenceWithRightMostColumn = NUMBER_OF_COLUMNS - 1 - chipColumn; // -1 to make the NUMBER_OF_COLUMNS matching the index numbers
+    let heighstRowAvailable = chipRow - differenceWithRightMostColumn;
+    if (heighstRowAvailable < 0) heighstRowAvailable = 0; // we need to check because the number of columns is greater than the number of rows so buttom left will result in -1 instead of 0
+
+    const furthestColumnAvailable =
+      chipColumn + (chipRow - heighstRowAvailable);
+
+    for (
+      let row = heighstRowAvailable, col = furthestColumnAvailable;
+      row < NUMBER_OF_ROWS && col >= 0;
+      row++, col--
+    ) {
+      if (boardData[col][row] === currentPlayer) {
+        numberOfConsecutiveChips++;
+        if (numberOfConsecutiveChips === CONSECUTIVE_CHIPS_TO_WIN) return true;
+      } else {
+        numberOfConsecutiveChips = 0;
+      }
+    }
     return false;
   }
 
+  //Go to most available top left cell, then check diagonally from top left to bottom right
   function isLeftDiagonalWin(): boolean {
+    let numberOfConsecutiveChips = 0;
+    const chipColumn = lastAddedChipPosition.current.column;
+    const chipRow = lastAddedChipPosition.current.row;
+
+    let heightRowAvailable = chipRow - chipColumn;
+    if (heightRowAvailable < 0) heightRowAvailable = 0;
+    let furthestColumnAvailable = chipColumn - chipRow - heightRowAvailable;
+    if (furthestColumnAvailable < 0) furthestColumnAvailable = 0;
+
+    for (
+      let row = heightRowAvailable, col = furthestColumnAvailable;
+      row < NUMBER_OF_ROWS && col < NUMBER_OF_COLUMNS;
+      row++, col++
+    ) {
+      if (boardData[col][row] === currentPlayer) {
+        numberOfConsecutiveChips++;
+        if (numberOfConsecutiveChips === CONSECUTIVE_CHIPS_TO_WIN) return true;
+      } else {
+        numberOfConsecutiveChips = 0;
+      }
+    }
     return false;
   }
 
   function hasAPlayerWon(): boolean {
-    return isHorizontalWin() || isVerticalWin();
+    return (
+      isHorizontalWin() ||
+      isVerticalWin() ||
+      isRightDiagonalWin() ||
+      isLeftDiagonalWin()
+    );
   }
 
   function isTheGameADraw(): boolean {
@@ -78,9 +129,11 @@ function GameBoard() {
     );
 
     if (hasAPlayerWon()) {
-      console.log("The game is won");
+      console.log("The game is won by:", currentPlayer);
+      setBoardData(initialBoardData);
     } else if (isTheGameADraw()) {
       console.log("Game is a Draw");
+      setBoardData(initialBoardData);
     }
   }, [boardData]);
 
